@@ -1,15 +1,24 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const port = 3001;
+const port = process.env.PORT || 3001;
+const { router: todoRoutes, todos } = require("./routes/todo.js");
 
-const todoRoutes = require("./routes/todo.js");
-const { todos } =require("./routes/todo.js");
-
+app.use(cors());
 app.use(express.json());
+app.set("view engine", "ejs");
+
 app.use("/todos", todoRoutes);
 
-app.set("view engine", "ejs");
+app.get("/todos-data", (req, res) => {
+  res.json(todos);
+});
+
+app.get("/todos-list", (req, res) => {
+  res.render("todos-page", { todos: todos });
+});
+
 app.get("/", (req, res) => {
   res.render("index");
 });
