@@ -7,6 +7,9 @@ const port = process.env.PORT;
 const { todos } = require("./routes/todo.js");
 const db = require("./database/db");
 
+const expressLayouts = require("express-ejs-layouts");
+app.use(expressLayouts);
+
 app.use(cors());
 app.use(express.json());
 app.set("view engine", "ejs");
@@ -18,15 +21,22 @@ app.get("/todos-data", (req, res) => {
 });
 
 app.get("/todos-list", (req, res) => {
-  res.render("todos-page", { todos: todos });
+  res.render("todos-page", { 
+    todos: todos,
+    layout: "layouts/main-layout",
+  });
 });
 
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    layout: "layouts/main-layout",
+  });
 });
 
 app.get("/contact", (req, res) => {
-  res.render("contact");
+  res.render("contact", {
+    layout: "layouts/main-layout",
+  });
 });
 
 app.get("/todo-view", (req, res) => {
@@ -34,6 +44,7 @@ app.get("/todo-view", (req, res) => {
     if (err) return res.status(500).send("Internal Server Error");
     res.render("todo", {
       todos: todos,
+      layout: "layouts/main-layout",
     });
   });
 });
