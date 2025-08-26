@@ -1,3 +1,5 @@
+// folder-express/routes/tododb.js (VERSI FINAL)
+
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db'); // Mengimpor koneksi database
@@ -6,7 +8,8 @@ const db = require('../database/db'); // Mengimpor koneksi database
 router.get('/', (req, res) => {
     db.query('SELECT * FROM todos', (err, results) => {
         if (err) return res.status(500).send('Internal Server Error');
-        res.json(results);
+        // DIUBAH: Menyesuaikan format output dengan front-end
+        res.json({ todos: results });
     });
 });
 
@@ -33,14 +36,41 @@ router.post('/', (req, res) => {
     });
 });
 
-// Endpoint untuk memperbarui tugas
+// Endpoint untuk memperbarui tugas (LOGIKA DIPERBAIKI)
 router.put('/:id', (req, res) => {
     const { task, completed } = req.body;
+    const { id } = req.params;
 
-    db.query('UPDATE todos SET task = ?, completed = ? WHERE id = ?', [task, completed, req.params.id], (err, results) => {
-        if (err) return res.status(500).send('Internal Server Error');
-        if (results.affectedRows === 0) return res.status(404).send('Tugas tidak ditemukan');
-        res.json({ id: req.params.id, task, completed });
+    if (task === undefined && completed === undefined) {
+        return res.status(400).send('Tidak ada data untuk diupdate. Kirim "task" atau "completed".');
+    }
+
+    let updateFields = [];
+    let values = [];
+
+    if (task !== undefined) {
+        updateFields.push('task = ?');
+        values.push(task);
+    }
+
+    if (completed !== undefined) {
+        updateFields.push('completed = ?');
+        values.push(completed);
+    }
+    
+    values.push(id); 
+
+    const sql = `UPDATE todos SET ${updateFields.join(', ')} WHERE id = ?`;
+
+    db.query(sql, values, (err, results) => {
+        if (err) {
+            console.error("Database Error:", err);
+            return res.status(500).send('Internal Server Error');
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).send('Tugas tidak ditemukan');
+        }
+        res.json({ message: 'Tugas berhasil diupdate' });
     });
 });
 
