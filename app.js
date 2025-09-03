@@ -6,12 +6,17 @@ const cors = require("cors");
 const db = require("./database/db");
 const port = process.env.PORT || 3001;
 
+const authRoutes = require("./routes/auth.js"); // Impor rute otentikasi
+const authMiddleware = require("./middleware/auth"); // Impor middleware otentikasi
 
 const expressLayouts = require("express-ejs-layouts");
 app.use(expressLayouts);
 app.use(cors());
 app.use(express.json());
 app.set("view engine", "ejs");
+
+app.use("/api/auth", authRoutes); // Gunakan rute otentikasi
+app.use("/api/todos", authMiddleware, todoRoutes); // Lindungi rute todo dengan middleware
 
 app.use("/todos", todoRoutes);
 
@@ -154,8 +159,6 @@ app.delete("/api/todos/:id", (req, res) => {
 
 
 app.use((req, res) => {
-
-  
   res.status(404).send("404 - Page Not Found");
 });
 
